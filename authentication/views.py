@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics, response, status, views, permissions
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from authentication.models import User
-from authentication.serializers import UserSerializer, LoginSerializer, UserRegisterSerializer
+from authentication.serializers import UserSerializer, LoginSerializer, UserRegisterSerializer, PasswordChangeWithOldSerializer
 from django.db import transaction
 
 
@@ -81,3 +81,15 @@ class UserBookMarkClearView(views.APIView):
         with transaction.atomic():
             user.delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PasswordChangeWithOldView(generics.CreateAPIView):
+    """
+        Create a model instance.
+    """
+    def create(self, request, *args, **kwargs):
+        serializer = PasswordChangeWithOldSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return response.Response({"message": "Parol muvaffaqiyatli o'zgartirildi."}, status=status.HTTP_201_CREATED, headers=headers)

@@ -90,6 +90,7 @@ class SerialUpdateAPIView(generics.UpdateAPIView):
     """
     permission_classes = (permissions.IsAuthenticated, IsGroupUserPermission)
     serializer_class = SerialSerializer
+    queryset = Serial.objects.all()
 
     def update(self, request, *args, **kwargs):
         pk = kwargs['pk']

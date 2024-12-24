@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
-from utils.generator import code_generator
 from utils.directory import directory_path
 
 
@@ -67,5 +66,3 @@ class Letter(models.Model):
 
     def __str__(self):
         return self.title
-
-

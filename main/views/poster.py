@@ -16,6 +16,7 @@ class PosterCreateAPIView(generics.CreateAPIView):
     """
     # parser_classes = (parsers.MultiPartParser,)
     permission_classes = (permissions.IsAuthenticated, IsGroupUserPermission)
+    queryset = Poster.objects.all()
 
     def create(self, request, *args, **kwargs):
         information_id = kwargs['information_id']

@@ -19,11 +19,9 @@ class IsGroupUserPermission(BasePermission):
         code_name = self.METHOD.get(request.method) + class_name
         try:
             is_exists = request.user.groups.permissions.filter(codename=code_name).exists()
-            if is_exists:
-                return True
+            return is_exists
         except Exception as e:
-            raise ValidationError({"error": e, "msg": "Bu ViewSetga kirishga ruxsat yuq"})
-        return False
+            raise ValidationError({"error": e, "msg": "Bu Viewga kirishga ruxsat yuq"})
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
@@ -33,11 +31,9 @@ class IsGroupUserPermission(BasePermission):
         code_name = self.METHOD.get(request.method) + class_name
         try:
             is_exists = request.user.groups.permissions.filter(codename=code_name).exists()
-            if is_exists:
-                return True
+            return is_exists
         except Exception as e:
             raise ValidationError({"error": e, "msg": "Bu ViewSetga kirishga ruxsat yuq"})
-        return False
 
 
 class IsOwnerPermission(BasePermission):

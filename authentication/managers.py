@@ -19,7 +19,6 @@ class UserManager(BaseUserManager):
             **extra_fields
         )
         user.password = make_password(password)
-        print(user)
         user.save(using=self._db)
         return user
 

@@ -1,4 +1,4 @@
-from django.db.models import Avg
+from django.db.models import Count, Case, When, IntegerField, Avg
 from rest_framework import generics, status, response, permissions
 from rest_framework.exceptions import ValidationError
 
@@ -10,25 +10,35 @@ class BookmarkListAPIView(generics.ListAPIView):
     """
         List a queryset.
     """
-    # serializer_class = BookmarkListSerializer
     serializer_class = InformationSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
         user = request.user
-        lst = []
-        info = []
-        queryset = Bookmark.objects.filter(user=user)
-        for bookmark in queryset:
-            if bookmark.information is not None and not self.request.user.has_perm("can_confidential") and bookmark.information.confidential:
-                pass
-            else:
-                info.append(bookmark.information)
-        for information in info:
-            rating = Rating.objects.filter(information=information).aggregate(rating=Avg('rating'))
-            information.rating = rating['rating']
-            lst.append(information)
-        serializer = self.get_serializer(lst, many=True)
+        information_queryset = Information.objects.filter(
+            rel_information__user=user
+        ).annotate(
+                rating=Avg('ratings__rating'),
+                serial_count=Count(
+                    Case(
+                        When(is_serial=True, then='serials'),
+                        output_field=IntegerField()
+                    ),
+                    distinct=True)
+            )
+        # lst = []
+        # info = []
+        # queryset = Bookmark.objects.filter(user=user)
+        # for bookmark in queryset:
+        #     if bookmark.information is not None and not self.request.user.has_perm("can_confidential") and bookmark.information.confidential:
+        #         pass
+        #     else:
+        #         info.append(bookmark.information)
+        # for information in info:
+        #     rating = Rating.objects.filter(information=information).aggregate(rating=Avg('rating'))
+        #     information.rating = rating['rating']
+        #     lst.append(information)
+        serializer = self.get_serializer(information_queryset, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 

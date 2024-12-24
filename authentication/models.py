@@ -95,7 +95,7 @@ class AdminUser(User):
     objects = AdminManager()
 
     def save(self, *args, **kwargs):
-        self.type = UserRoleEnum.ADMIN
+        self.type = self.UserRole.ADMIN
         return super().save(*args, **kwargs)
 
 
@@ -108,7 +108,7 @@ class LeaderUser(User):
     objects = LeaderManager()
 
     def save(self, *args, **kwargs):
-        self.type = UserRoleEnum.LEADER
+        self.type = self.UserRole.LEADER
         return super().save(*args, **kwargs)
 
 
@@ -121,7 +121,7 @@ class EmployeeUser(User):
     objects = EmployeeManager()
 
     def save(self, *args, **kwargs):
-        self.type = UserRoleEnum.EMPLOYEE
+        self.type = self.UserRole.EMPLOYEE
         return super().save(*args, **kwargs)
 
 
@@ -134,5 +134,5 @@ class LowUser(User):
     objects = LowUserManager()
 
     def save(self, *args, **kwargs):
-        self.type = UserRoleEnum.LOW_USER
+        self.type = self.UserRole.LOW_USER
         return super().save(*args, **kwargs)

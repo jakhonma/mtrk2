@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from authentication.models import User, AdminUser, LeaderUser, EmployeeUser
 from django.utils.translation import gettext_lazy as _
 from controller.serializers import GroupSerializer
+from django.contrib.auth.hashers import check_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -77,3 +78,31 @@ class UserRegisterSerializer(serializers.Serializer):
         if len(password) < 8:
             raise ValidationError(_("Password kamida 8 ta belgidan iborat bo'lishi kerak"))
         return attrs
+
+
+class PasswordChangeWithOldSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    old_password = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+
+    def validate_user_id(self, value):
+        if not User.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Foydalanuvchi topilmadi.")
+        return value
+
+    def validate(self, attrs):
+        user_id = attrs.get('user_id')
+        old_password = attrs.get('old_password')
+        user = User.objects.get(id=user_id)
+
+        # Eski passwordni tekshirish
+        if not check_password(old_password, user.password):
+            raise serializers.ValidationError({"msg": "Eski parol noto'g'ri."})
+        return attrs
+
+    def save(self):
+        user_id = self.validated_data['user_id']
+        new_password = self.validated_data['new_password']
+        user = User.objects.get(id=user_id)
+        user.set_password(new_password)
+        user.save()
