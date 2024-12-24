@@ -1,0 +1,1 @@
+from helper.tests.departnemt.test_serializers import TestDepartmentSerializerTestCase
