@@ -67,6 +67,7 @@ class InformationCreateUpdateSerializer(serializers.Serializer):
     fond = FondSerializer(read_only=True)
     category_id = serializers.IntegerField(write_only=True)
     category = InformationCategorySerializer(read_only=True)
+    title = serializers.CharField(max_length=255)
     mtv_ids = serializers.PrimaryKeyRelatedField(
         queryset=Mtv.objects.all(),
         many=True,
@@ -100,30 +101,66 @@ class InformationCreateUpdateSerializer(serializers.Serializer):
         many=True,
         required=False
     )
-    format = FormatSerializer(many=True, read_only=True)
-    title = serializers.CharField(max_length=255)
-    mtv_index = serializers.CharField(max_length=100, allow_null=True, allow_blank=True)
-    location_on_server = serializers.CharField(max_length=250, allow_null=True, allow_blank=True)
-    color = serializers.ChoiceField(choices=COLORS, default=COLOURED)
-    material = serializers.ChoiceField(choices=MATERIAL, default=ETHER)
-    duration = serializers.TimeField(allow_null=True)
+    format = FormatSerializer(
+        many=True, 
+        read_only=True
+    )
+    mtv_index = serializers.CharField(
+        max_length=100, 
+        allow_null=True, 
+        allow_blank=True
+    )
+    location_on_server = serializers.CharField(
+        max_length=250, 
+        allow_null=True, 
+        allow_blank=True
+    )
+    color = serializers.ChoiceField(
+        choices=COLORS, 
+        default=COLOURED
+    )
+    material = serializers.ChoiceField(
+        choices=MATERIAL, 
+        default=ETHER
+    )
+    duration = serializers.TimeField(
+        allow_null=True
+    )
     year = serializers.IntegerField(validators=[
-        MinValueValidator(1920, message="Yilni tug'ri kiriting?"),
-        MaxValueValidator(int(date.today().year), message="Yilni tug'ri kiriting?")
-    ], allow_null=True)
+            MinValueValidator(1920, message="Yilni tug'ri kiriting?"),
+            MaxValueValidator(int(date.today().year), message="Yilni tug'ri kiriting?")
+        ], 
+        allow_null=True
+    )
     month = serializers.IntegerField(validators=[
-        MinValueValidator(1, message="Oyni tug'ri kiriting?"),
-        MaxValueValidator(12, message="Oyni tug'ri kiriting?")
-    ], allow_null=True)
+            MinValueValidator(1, message="Oyni tug'ri kiriting?"),
+            MaxValueValidator(12, message="Oyni tug'ri kiriting?")
+        ], 
+        allow_null=True
+    )
     day = serializers.IntegerField(validators=[
-        MinValueValidator(1, message="Kunni tug'ri kiriting?"),
-        MaxValueValidator(31, message="Kunni tug'ri kiriting?")
-    ], allow_null=True)
-    restorat = serializers.CharField(max_length=200, allow_null=True, allow_blank=True)
+            MinValueValidator(1, message="Kunni tug'ri kiriting?"),
+            MaxValueValidator(31, message="Kunni tug'ri kiriting?")
+        ], 
+        allow_null=True
+    )
+    restorat = serializers.CharField(
+        max_length=200, 
+        allow_null=True, 
+        allow_blank=True
+    )
     restoration = serializers.BooleanField(default=False)
     confidential = serializers.BooleanField(default=False)
-    brief_data = serializers.CharField(max_length=3000, allow_null=True, allow_blank=True)
-    summary = serializers.CharField(max_length=3000, allow_null=True, allow_blank=True)
+    brief_data = serializers.CharField(
+        max_length=3000, 
+        allow_null=True, 
+        allow_blank=True
+    )
+    summary = serializers.CharField(
+        max_length=3000, 
+        allow_null=True, 
+        allow_blank=True
+    )
     is_serial = serializers.BooleanField(default=False)
     created = serializers.DateTimeField(read_only=True)
     updated = serializers.DateTimeField(read_only=True)

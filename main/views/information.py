@@ -1,17 +1,18 @@
 from django.db.models import Count, Case, When, IntegerField, Avg
 from django.db.models.functions import Coalesce
 from rest_framework import (
-    viewsets, status, exceptions, filters, permissions, pagination,
-    response, generics
+    status, filters, permissions, 
+    pagination, response, generics
 )
 from main.serializers import InformationSerializer, InformationCreateUpdateSerializer
 from main.models import Information
 from django_filters.rest_framework import DjangoFilterBackend
 from utils.media import delete_media
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from controller.permissions import IsOwnerPermission, IsGroupUserPermission
 from django.shortcuts import get_object_or_404
 from main.filters import InformationFilter
+from django.db import transaction
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 # class InformationViewSet(viewsets.ReadOnlyModelViewSet):
@@ -60,6 +61,7 @@ from main.filters import InformationFilter
 
 class InformationListAPIView(generics.ListAPIView):
     serializer_class = InformationSerializer
+    authentication_classes = (JWTAuthentication, )
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = pagination.LimitOffsetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
@@ -92,6 +94,7 @@ class InformationListAPIView(generics.ListAPIView):
 
 
 class InformationRetrieveAPIView(generics.RetrieveAPIView):
+    authentication_classes = (JWTAuthentication, )
     serializer_class = InformationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -114,6 +117,7 @@ class InformationCreateAPIView(generics.CreateAPIView):
     """
         Information creation API view
     """
+    authentication_classes = (JWTAuthentication, )
     permission_classes = (permissions.IsAuthenticated, IsGroupUserPermission)
     queryset = Information.objects.all()
     serializer_class = InformationCreateUpdateSerializer
@@ -124,7 +128,8 @@ class InformationCreateAPIView(generics.CreateAPIView):
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            serializer.save()
         headers = self.get_success_headers(serializer.data)
         return response.Response(
             serializer.data,
@@ -137,6 +142,7 @@ class InformationUpdateAPIView(generics.UpdateAPIView):
     """
         Update a model instance.
     """
+    authentication_classes = (JWTAuthentication, )
     permission_classes = (permissions.IsAuthenticated, IsGroupUserPermission)
     queryset = Information.objects.all()
     serializer_class = InformationCreateUpdateSerializer
@@ -163,6 +169,7 @@ class InformationDestroyAPIView(generics.DestroyAPIView):
     """
         Destroy a model instance.
     """
+    authentication_classes = (JWTAuthentication, )
     permission_classes = (permissions.IsAuthenticated, IsGroupUserPermission)
     serializer_class = InformationSerializer
 
@@ -182,4 +189,5 @@ class InformationDestroyAPIView(generics.DestroyAPIView):
         if cadre is not None:
             for item in cadre:
                 delete_media(item.image.name)
-        instance.delete()
+        with transaction.atomic():
+            instance.delete()

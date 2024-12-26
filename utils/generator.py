@@ -4,4 +4,4 @@ def code_generator() -> int:
     """
         Tasodifiy sonlar generatsiya qiladi
     """
-    return int(str(uuid4().int)[:14])
+    return int(str(uuid4().int)[:16])

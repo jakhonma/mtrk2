@@ -2,6 +2,7 @@ from rest_framework import generics, response, status, permissions
 from rest_framework.exceptions import ValidationError
 from main.models import Rating
 from main.serializers import RatingCreateUpdateSerializer, RatingSerializer
+from django.db import transaction
 
 
 class RatingRetrieveAPIView(generics.RetrieveAPIView):
@@ -45,7 +46,8 @@ class RatingCreateAPIView(generics.CreateAPIView):
             }
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            serializer.save()
         headers = self.get_success_headers(serializer.data)
         data = {
                 "is_rating": True,
@@ -72,7 +74,8 @@ class RatingUpdateAPIView(generics.UpdateAPIView):
                 partial=partial
             )
             serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
+            with transaction.atomic():
+                serializer.save()
 
             if getattr(instance, '_prefetched_objects_cache', None):
                 instance._prefetched_objects_cache = {}

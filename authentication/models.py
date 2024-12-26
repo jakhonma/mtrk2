@@ -3,15 +3,33 @@ from django.db import models
 from django.contrib.auth.models import Group, PermissionsMixin, AbstractBaseUser, Permission
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from authentication.managers import UserManager, AdminManager, LeaderManager, EmployeeManager, LowUserManager
+from authentication.managers import (
+    UserManager, 
+    AdminManager, 
+    ArchiveDirectorManager, 
+    ChannelDirectorManager, 
+    ArchiveEmployeeManager, 
+    ChannelEmployeeManager, 
+    LowUserManager
+)
 from utils.choices import UserRoleEnum
+
+
+class UserRoles(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    # is_unique = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     class UserRole(models.TextChoices):
         ADMIN = 'ADMIN', 'ADMIN'
-        LEADER = 'LEADER', 'LEADER'
-        EMPLOYEE = 'EMPLOYEE', 'EMPLOYEE'
+        ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR', 'ARCHIVE_DIRECTOR'
+        CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR', 'CHANNEL_DIRECTOR'
+        ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE', 'ARCHIVE_EMPLOYEE'
+        CHANNEL_EMPLOYEE = 'CHANNEL_EMPLOYEE', 'CHANNEL_EMPLOYEE'
         LOW_USER = 'LOW_USER', 'LOW_USER'
 
     username = models.CharField(
@@ -51,8 +69,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         _("date joined"),
         default=timezone.now
     )
+    user_role = models.ForeignKey(
+        UserRoles, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
     role = models.CharField(
-        max_length=10,
+        max_length=18,
         choices=UserRole.choices,
         default=UserRole.LOW_USER,
         blank=True
@@ -95,33 +119,59 @@ class AdminUser(User):
     objects = AdminManager()
 
     def save(self, *args, **kwargs):
-        self.type = self.UserRole.ADMIN
+        self.role = self.UserRole.ADMIN
         return super().save(*args, **kwargs)
 
 
-class LeaderUser(User):
+class ArchiveDirectorUser(User):
     class Meta:
         proxy = True
-        verbose_name = _("leader")
-        verbose_name_plural = _("leaders")
+        verbose_name = _("archive director")
+        verbose_name_plural = _("archive directors")
 
-    objects = LeaderManager()
+    objects = ArchiveDirectorManager()
 
     def save(self, *args, **kwargs):
-        self.type = self.UserRole.LEADER
+        self.role = self.UserRole.ARCHIVE_DIRECTOR
         return super().save(*args, **kwargs)
 
 
-class EmployeeUser(User):
+class ChannelDirectorUser(User):
     class Meta:
         proxy = True
-        verbose_name = _("employee")
-        verbose_name_plural = _("employees")
+        verbose_name = _("channel director")
+        verbose_name_plural = _("channel directors")
 
-    objects = EmployeeManager()
+    objects = ChannelDirectorManager()
 
     def save(self, *args, **kwargs):
-        self.type = self.UserRole.EMPLOYEE
+        self.role = self.UserRole.CHANNEL_DIRECTOR
+        return super().save(*args, **kwargs)
+
+
+class ArchiveEmployeeUser(User):
+    class Meta:
+        proxy = True
+        verbose_name = _("archive employee")
+        verbose_name_plural = _("archive employees")
+
+    objects = ArchiveEmployeeManager()
+
+    def save(self, *args, **kwargs):
+        self.role = self.UserRole.ARCHIVE_EMPLOYEE
+        return super().save(*args, **kwargs)
+
+
+class ChannelEmployeeUser(User):
+    class Meta:
+        proxy = True
+        verbose_name = _("channel employee")
+        verbose_name_plural = _("channel employees")
+
+    objects = ChannelEmployeeManager()
+
+    def save(self, *args, **kwargs):
+        self.role = self.UserRole.CHANNEL_EMPLOYEE
         return super().save(*args, **kwargs)
 
 
@@ -134,5 +184,5 @@ class LowUser(User):
     objects = LowUserManager()
 
     def save(self, *args, **kwargs):
-        self.type = self.UserRole.LOW_USER
+        self.role = self.UserRole.LOW_USER
         return super().save(*args, **kwargs)

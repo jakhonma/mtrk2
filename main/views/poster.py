@@ -3,9 +3,7 @@ from rest_framework.exceptions import ValidationError
 from main.serializers import PosterSerializer
 from main.models import Information, Poster
 from utils.media import delete_media
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from controller.permissions import IsOwnerPermission, IsGroupUserPermission
-from rest_framework.authentication import BasicAuthentication
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 

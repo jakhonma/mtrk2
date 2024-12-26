@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from authentication.models import User, AdminUser, LeaderUser, EmployeeUser
+from authentication.models import User, AdminUser, UserRoles
 from django.utils.translation import gettext_lazy as _
 from controller.serializers import GroupSerializer
 from django.contrib.auth.hashers import check_password
@@ -60,7 +60,13 @@ class UserRegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=200)
 
     def create(self, validated_data):
-        return User.objects.create(**validated_data)
+        user_role, created = UserRoles.objects.get_or_create(
+            name="LOW_USER",  
+        )
+        user = User.objects.create(**validated_data)
+        user.user_role = user_role
+        user.save()
+        return user
     
     def get_tokens(self, user: User):
         refresh = RefreshToken.for_user(user)

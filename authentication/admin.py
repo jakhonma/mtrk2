@@ -1,5 +1,5 @@
 from django.contrib import admin
-from authentication.models import User, AdminUser, LeaderUser, EmployeeUser, LowUser
+from authentication.models import User, AdminUser, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles
 from django.utils.translation import gettext_lazy as _
 from .models import AdminUser
 
@@ -10,10 +10,9 @@ class AdminUserAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if not obj:
-            print(form.base_fields['role'])
             form.base_fields['role'].initial = 'ADMIN'
         return form
 
 
 admin.site.register(AdminUser, AdminUserAdmin)
-admin.site.register([User, LeaderUser, EmployeeUser, LowUser])
+admin.site.register([User, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles])

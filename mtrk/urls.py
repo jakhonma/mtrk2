@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/v1/auth/', include('authentication.urls')),
     path('api/v1/controller/', include('controller.urls')),
     path('api/v1/helper/', include('helper.urls')),
+    path('api/v1/letter/', include('letter.urls')),
     path('api/v1/main/', include('main.urls')),
     path('api/v1/report/', include('report.urls')),
-    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

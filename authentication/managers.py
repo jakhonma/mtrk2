@@ -68,7 +68,7 @@ class UserManager(BaseUserManager):
 
 class AdminManager(UserManager):
     ADMIN = 'ADMIN'
-
+    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
             role=self.ADMIN,
@@ -79,12 +79,12 @@ class AdminManager(UserManager):
         return queryset
 
 
-class LeaderManager(UserManager):
-    LEADER = 'LEADER'
-
+class ArchiveDirectorManager(UserManager):
+    ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR'
+    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.LEADER,
+            role=self.ARCHIVE_DIRECTOR,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -92,12 +92,38 @@ class LeaderManager(UserManager):
         return queryset
 
 
-class EmployeeManager(UserManager):
-    EMPLOYEE = 'EMPLOYEE'
-
+class ChannelDirectorManager(UserManager):
+    CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR'
+    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.EMPLOYEE,
+            role=self.CHANNEL_DIRECTOR,
+            is_superuser=False,
+            is_active=True,
+            is_staff=False
+        )
+        return queryset
+
+
+class ArchiveEmployeeManager(UserManager):
+    ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE'
+        
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset(*args, **kwargs).filter(
+            role=self.ARCHIVE_EMPLOYEE,
+            is_superuser=False,
+            is_active=True,
+            is_staff=False
+        )
+        return queryset
+
+
+class ChannelEmployeeManager(UserManager):
+    CHANNEL_EMPLOYEE = 'CHANNEL_EMPLOYEE'
+    
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset(*args, **kwargs).filter(
+            role=self.CHANNEL_EMPLOYEE,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -107,7 +133,7 @@ class EmployeeManager(UserManager):
 
 class LowUserManager(UserManager):
     LOW_USER = 'LOW_USER'
-
+    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
             role=self.LOW_USER,

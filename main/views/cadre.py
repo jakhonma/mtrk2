@@ -1,12 +1,10 @@
 from rest_framework import status, filters, permissions, response, parsers, generics
 from main.serializers import CadreSerializer
 from main.models import Cadre
-from django_filters.rest_framework import DjangoFilterBackend
 from utils.media import delete_media
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from controller.permissions import IsOwnerPermission, IsGroupUserPermission
-from rest_framework.authentication import BasicAuthentication
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 
 
 class CadreListAPIView(generics.ListAPIView):
@@ -40,7 +38,8 @@ class CadreCreateAPIView(generics.CreateAPIView):
             context={'information_id': information_id}
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return response.Response(
             serializer.data,
@@ -64,4 +63,5 @@ class CadreDeleteAPIView(generics.DestroyAPIView):
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
-        instance.delete()
+        with transaction.atomic():
+            instance.delete()

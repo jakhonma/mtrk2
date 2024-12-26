@@ -20,7 +20,7 @@ class Report(models.Model):
         null=True
     )
     employee = models.ForeignKey(
-        'authentication.EmployeeUser',
+        'authentication.ArchiveEmployeeUser',
         on_delete=models.SET_NULL,
         blank=True,
         null=True

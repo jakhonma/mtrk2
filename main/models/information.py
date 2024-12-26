@@ -56,7 +56,10 @@ class Information(models.Model):
         null=True,
         blank=True
     )
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(
+        max_length=255, 
+        db_index=True
+    )
     mtv_index = models.CharField(max_length=100, null=True, blank=True)
     location_on_server = models.CharField(max_length=200, null=True, blank=True)
     color = models.CharField(

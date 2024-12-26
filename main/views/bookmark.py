@@ -1,7 +1,8 @@
 from django.db.models import Count, Case, When, IntegerField, Avg
 from rest_framework import generics, status, response, permissions
 from rest_framework.exceptions import ValidationError
-
+from django.db import transaction
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from main.models import Bookmark, Information, Rating
 from main.serializers import BookmarkSerializer, BookmarkListSerializer, InformationSerializer
 
@@ -10,6 +11,7 @@ class BookmarkListAPIView(generics.ListAPIView):
     """
         List a queryset.
     """
+    authentication_classes = (JWTAuthentication, )
     serializer_class = InformationSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -43,6 +45,7 @@ class BookmarkListAPIView(generics.ListAPIView):
 
 
 class BookmarkListIdAPIView(generics.ListAPIView):
+    authentication_classes = (JWTAuthentication, )
     permission_classes = (permissions.IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
@@ -55,6 +58,7 @@ class BookmarkCreateAPIView(generics.CreateAPIView):
     """
         Create a model instance.
     """
+    authentication_classes = (JWTAuthentication, )
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = BookmarkSerializer
 
@@ -62,7 +66,8 @@ class BookmarkCreateAPIView(generics.CreateAPIView):
         user_id = request.user.id
         serializer = self.get_serializer(data=request.data, context={'user_id': user_id})
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            serializer.save()
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -71,6 +76,8 @@ class BookmarkDestroyAPIView(generics.DestroyAPIView):
     """
         Destroy a model instance.
     """
+    authentication_classes = (JWTAuthentication, )
+    permission_classes = (permissions.IsAuthenticated, )
 
     def destroy(self, request, *args, **kwargs):
         user = request.user
@@ -83,4 +90,5 @@ class BookmarkDestroyAPIView(generics.DestroyAPIView):
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
-        instance.delete()
+        with transaction.atomic():
+            instance.delete()

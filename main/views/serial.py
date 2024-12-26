@@ -5,6 +5,7 @@ from controller.permissions import IsOwnerPermission, IsGroupUserPermission
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Sum
 from utils import timedelta, not_serial
+from django.db import transaction
 
 
 class SerialListAPiView(generics.ListAPIView):
@@ -75,7 +76,8 @@ class SerialCreateAPIView(generics.CreateAPIView):
             context={'information_id': kwargs['information_id']}
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            serializer.save()
         headers = self.get_success_headers(serializer.data)
         return response.Response(
             serializer.data,
@@ -108,7 +110,8 @@ class SerialUpdateAPIView(generics.UpdateAPIView):
             }
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        with transaction.atomic():
+            serializer.save()
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
@@ -127,5 +130,6 @@ class SerialDestroyAPIView(generics.DestroyAPIView):
             information_id=kwargs['information_id'],
             pk=pk
         )
-        self.perform_destroy(instance)
+        with transaction.atomic():
+            instance.delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)

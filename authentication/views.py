@@ -3,6 +3,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from authentication.models import User
 from authentication.serializers import UserSerializer, LoginSerializer, UserRegisterSerializer, PasswordChangeWithOldSerializer
 from django.db import transaction
+from letter.models import Notification
 
 
 class LoginAPIView(generics.GenericAPIView):
@@ -90,6 +91,19 @@ class PasswordChangeWithOldView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = PasswordChangeWithOldSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        with transaction.atomic():
+            serializer.save()
         headers = self.get_success_headers(serializer.data)
         return response.Response({"message": "Parol muvaffaqiyatli o'zgartirildi."}, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class UserNotificationAPIView(generics.ListAPIView):
+    """
+    List a queryset.
+    """
+    def list(self, request, *args, **kwargs):
+        count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+        data = {
+            'count': count
+        }
+        return response.Response(data=data)
