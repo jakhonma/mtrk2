@@ -8,4 +8,5 @@ router.register('permissions', views.PermissionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('channel-list/', views.ChannelListAPIView.as_view()),
 ]

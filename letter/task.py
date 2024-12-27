@@ -16,7 +16,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 pdfmetrics.registerFont(TTFont('DejaVuSans', 'static/DejaVuSans.ttf'))
 
-def add_letter(data, info_data):
+def add_letter(data):
     code = code_generator()
     height = 550
     line_spacing = 20 
@@ -40,11 +40,9 @@ def add_letter(data, info_data):
     p.drawString(60, 580, data["description"][:-4])
 
     p.setFont('DejaVuSans', size=10)
-    for item in info_data:
-        i = str(item['i']) + '.'
+    for item in data['bookmarks']:
         id_str = str(item['id'])
         title_str = str(item['title'])
-        p.drawString(80, height, i)
         p.drawString(120, height, id_str)
         p.drawString(150, height, title_str)
         height -= line_spacing
@@ -58,7 +56,8 @@ def add_letter(data, info_data):
 
     buffer.seek(0)  # Fayl boshiga qaytarish
     pdf_content = ContentFile(buffer.read(), f"{code}.pdf")
-    return (pdf_content, channel.director)
+    print(pdf_content)
+    return pdf_content
 
 
 # @shared_task

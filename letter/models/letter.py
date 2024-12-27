@@ -14,11 +14,21 @@ class Progress(models.TextChoices):
     CANCELED = 'CANCELED', 'Cancelled'
 
 
+class LetterType(models.TextChoices):
+    NOTICE = 'notice', 'Notice'  # Bildirishnoma
+    APPLICATION = 'application', 'Application' #Ariza xati
+    # OFFICIAL = 'official', 'Official'  # Rasmiy xat
+    # PERSONAL = 'personal', 'Personal'  # Shaxsiy xat
+    # INVITATION = 'invitation', 'Invitation'  # Taklifnoma
+    # REQUEST = 'request', 'Request'  # So'rov xati
+    # OTHER = 'other', 'Other'  # Boshqa
+
+
 class Letter(models.Model):
-    title = models.CharField(
-        max_length=200, 
-        null=True, 
-        blank=True
+    letter_type = models.CharField(
+        max_length=12, 
+        choices=LetterType.choices,
+        default=LetterType.NOTICE
     )
     pdf = models.FileField(
         upload_to=directory_path, 
@@ -31,7 +41,7 @@ class Letter(models.Model):
         on_delete=models.CASCADE
     )
     created_by = models.ForeignKey(
-        'authentication.User', 
+        'authentication.ChannelEmployeeUser', 
         on_delete=models.CASCADE, 
         related_name='created_letters'
     )
@@ -48,39 +58,44 @@ class Letter(models.Model):
         default=Progress.CREATED
     )
     description = models.CharField(max_length=300)
-    explain = models.CharField(max_length=200, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()
     updated = models.DateTimeField(auto_now=True)
 
-    # def channel_directory(self):
-    #     if self.process == Progress.CREATED:
-    #         self.process = Progress.CHANNEL_DIRECTOR
-    #         self.save()
+    def channel_directory(self):
+        if self.progress == Progress.CREATED:
+            self.progress = Progress.CHANNEL_DIRECTOR
+            self.save()
+            return True
+        return False
 
-    # def archive_directory(self):
-    #     if self.process == Progress.CHANNEL_DIRECTOR:
-    #         self.process = Progress.ARCHIVE_DIRECTOR
-    #         self.save()
+    def archive_directory(self):
+        if self.progress == Progress.CHANNEL_DIRECTOR:
+            self.progress = Progress.ARCHIVE_DIRECTOR
+            self.save()
+            return True
+        return False
 
-    # def archive_employee(self):
-    #     if self.process == Progress.ARCHIVE_DIRECTOR:
-    #         self.process = Progress.ARCHIVE_EMPLOYEE
-    #         self.save()
-    #     else:
-    #         pass
+    def archive_employee(self):
+        if self.progress == Progress.ARCHIVE_DIRECTOR:
+            self.progress = Progress.ARCHIVE_EMPLOYEE
+            self.save()
+            return True
+        return False
 
-    # def archive_finished(self):
-    #     if self.process == Progress.ARCHIVE_EMPLOYEE:
-    #         self.process = Progress.FINISHED
-    #         self.is_active = False
-    #         self.save()
+    def archive_finished(self):
+        if self.progress == Progress.ARCHIVE_EMPLOYEE:
+            self.progress = Progress.FINISHED
+            self.is_active = False
+            self.save()
+            return True
+        return False
 
-    # def cancel(self):
-    #     self.process = Progress.CANCELED
-    #     self.is_active = False
-    #     self.save()
-
+    def cancel(self):
+        self.progress = Progress.CANCELED
+        self.is_active = False
+        self.save()
+    
     def __str__(self):
-        return self.title
+        return self.letter_type

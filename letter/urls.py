@@ -10,4 +10,7 @@ urlpatterns = [
 
     path('letter-create/', views.LetterCreateAPIView.as_view()),
     path('user-notification-list/', views.UserNotificationListAPIView.as_view()),
+
+
+    path('user-letter-progress-list/', views.LetterProgressAPIView.as_view()),
 ]

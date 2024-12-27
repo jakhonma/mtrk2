@@ -82,7 +82,7 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django_mtrk',
+        'NAME': 'django_mtrk2',
         'USER': 'postgres',
         'PASSWORD': '0202',
         'HOST': 'localhost',
