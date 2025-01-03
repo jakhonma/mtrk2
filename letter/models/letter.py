@@ -57,7 +57,7 @@ class Letter(models.Model):
         choices=Progress.choices, 
         default=Progress.CREATED
     )
-    description = models.CharField(max_length=300)
+    description = models.CharField(max_length=800)
     is_active = models.BooleanField(default=True)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()

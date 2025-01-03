@@ -1,5 +1,5 @@
 from rest_framework import viewsets, generics, permissions, response
-from controller.serializers import GroupSerializer, PermissionSerializer
+from authentication.serializers import GroupSerializer, PermissionSerializer
 from django.contrib.auth.models import Group, Permission
 from controller.serializers import ChannelSerializer
 from controller.models import Channel

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, views, generics, response, permissions, status
+from rest_framework import viewsets, views, generics, response, permissions, status, parsers
 from letter.models import Letter, Notification, LetterAction, LetterProgress, Progress
 from letter.serializers import LetterCreateUpdateSerializer
 from letter.task import add_letter
@@ -10,15 +10,14 @@ class LetterCreateAPIView(generics.CreateAPIView):
         Create a model instance.
     """
     permission_classes = [permissions.IsAuthenticated, ]
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
     serializer_class = LetterCreateUpdateSerializer
     queryset = Letter.objects.all()
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
-        pdf = add_letter(request.data)
-        print(request.user)
+        # pdf = add_letter(request.data)
         serializer = LetterCreateUpdateSerializer(data=request.data)
-        serializer.context['pdf'] = pdf
+        # serializer.context['pdf'] = pdf
         serializer.context['request'] = request
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
@@ -44,11 +43,5 @@ class LetterListAPIView(generics.ListAPIView):
     """
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)

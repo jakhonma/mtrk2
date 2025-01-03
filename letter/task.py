@@ -19,6 +19,9 @@ pdfmetrics.registerFont(TTFont('DejaVuSans', 'static/DejaVuSans.ttf'))
 def add_letter(data):
     code = code_generator()
     height = 550
+    desc_height = 620
+    start = 0
+    end = 103
     line_spacing = 20 
     try:
         channel = Channel.objects.get(pk=data["channel_id"])
@@ -35,9 +38,20 @@ def add_letter(data):
     p.setFont("Helvetica-Bold", 18)
     p.drawString(270, 650, f"BILDIRGI")
     p.setFont('DejaVuSans', size=10)
-    p.drawString(80, 620, data["description"][:-8])
-    p.drawString(60, 600, data["description"][:-4])
-    p.drawString(60, 580, data["description"][:-4])
+    # count = len(data["description"])
+    # desc = "    " + data["description"]
+    # p.drawString(80, 620, data["description"][:-8])
+    # p.drawString(60, 600, data["description"][:-4])
+    # p.drawString(60, 580, data["description"][:-4])
+
+    desc_count = len(data["description"])
+    desc = "    " + data["description"]
+    while desc_count > 0:
+        p.drawString(60, desc_height, desc[start: end])
+        desc_height -= 20
+        desc_count -= 103
+        start += 103
+        end += 103
 
     p.setFont('DejaVuSans', size=10)
     for item in data['bookmarks']:

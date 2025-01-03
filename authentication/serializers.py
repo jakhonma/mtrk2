@@ -4,8 +4,22 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from authentication.models import User, AdminUser, UserRoles
 from django.utils.translation import gettext_lazy as _
-from controller.serializers import GroupSerializer
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import Group, Permission
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    permissions = PermissionSerializer(many=True)
+
+    class Meta:
+        model = Group
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):

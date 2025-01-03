@@ -1,23 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth.models import Group, Permission
 from controller.models import Channel
+from authentication.serializers import UserSerializer
 
 
 class ChannelSerializer(serializers.ModelSerializer):
+    director = UserSerializer(read_only=True)
     class Meta:
         model = Channel
-        fields = '__all__'
+        fields = ['id', 'name', 'director', 'phone', 'employee']
 
-
-class PermissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Permission
-        fields = '__all__'
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    permissions = PermissionSerializer(many=True)
-
-    class Meta:
-        model = Group
-        fields = '__all__'
