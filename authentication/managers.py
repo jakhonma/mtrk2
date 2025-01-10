@@ -2,6 +2,7 @@ from django.apps import apps
 from django.contrib import auth
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.hashers import make_password
+from utils.choices import UserRole
 
 
 class UserManager(BaseUserManager):
@@ -67,11 +68,9 @@ class UserManager(BaseUserManager):
 
 
 class AdminManager(UserManager):
-    ADMIN = 'ADMIN'
-    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.ADMIN,
+            role=UserRole.ADMIN,
             is_superuser=True,
             is_active=True,
             is_staff=True
@@ -80,11 +79,9 @@ class AdminManager(UserManager):
 
 
 class ArchiveDirectorManager(UserManager):
-    ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR'
-    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.ARCHIVE_DIRECTOR,
+            role=UserRole.ARCHIVE_DIRECTOR,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -93,11 +90,20 @@ class ArchiveDirectorManager(UserManager):
 
 
 class ChannelDirectorManager(UserManager):
-    CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR'
-    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.CHANNEL_DIRECTOR,
+            role=UserRole.CHANNEL_DIRECTOR,
+            is_superuser=False,
+            is_active=True,
+            is_staff=False
+        )
+        return queryset
+
+
+class ChannelAssistantManager(UserManager):
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset(*args, **kwargs).filter(
+            role=UserRole.CHANNEL_ASSISTANT,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -106,11 +112,9 @@ class ChannelDirectorManager(UserManager):
 
 
 class ArchiveEmployeeManager(UserManager):
-    ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE'
-        
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.ARCHIVE_EMPLOYEE,
+            role=UserRole.ARCHIVE_EMPLOYEE,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -119,11 +123,9 @@ class ArchiveEmployeeManager(UserManager):
 
 
 class ChannelEmployeeManager(UserManager):
-    CHANNEL_EMPLOYEE = 'CHANNEL_EMPLOYEE'
-    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.CHANNEL_EMPLOYEE,
+            role=UserRole.CHANNEL_EMPLOYEE,
             is_superuser=False,
             is_active=True,
             is_staff=False
@@ -132,11 +134,9 @@ class ChannelEmployeeManager(UserManager):
 
 
 class LowUserManager(UserManager):
-    LOW_USER = 'LOW_USER'
-    
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs).filter(
-            role=self.LOW_USER,
+            role=UserRole.LOW_USER,
             is_superuser=False,
             is_active=True,
             is_staff=False

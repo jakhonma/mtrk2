@@ -1,18 +1,20 @@
-from rest_framework import views, permissions, response, generics
-from letter.serializers import LetterProgressSerializer
+from rest_framework import permissions, response, generics, status, exceptions
+from letter.serializers import LetterProgressSerializer, LetterProgressCreateApprovedSerializer, LetterProgressCreateRejectedSerializer
 from letter.models import LetterProgress, Progress
+from django.db.models import Q
+from utils.choices import UserRole
 
 
-class LetterProgressAPIView(generics.ListAPIView):
+class LetterProgressUserAllAPIView(generics.ListAPIView):
     """
-    List a queryset.
+        List a queryset.
     """
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = LetterProgressSerializer
 
     def list(self, request, *args, **kwargs):
         user = request.user
-        queryset = LetterProgress.objects.filter(changed_by=user, letter__is_active=True)
+        queryset = LetterProgress.objects.filter(Q(recipient=user) | Q(sent=user), letter__is_active=True)
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
 
@@ -24,18 +26,46 @@ class LetterProgressAPIView(generics.ListAPIView):
     #     return response.Response(serialazer.data)
 
 
-class LetterProgressUpdateAPIView(generics.UpdateAPIView):
-    """
-        Update a model instance.
-    """
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+class LetterProgressUserSentAPIView(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = LetterProgressSerializer
 
-        if getattr(instance, '_prefetched_objects_cache', None):
-            instance._prefetched_objects_cache = {}
-
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        queryset = LetterProgress.objects.filter(sent=user, letter__is_active=True)
+        serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
+
+
+class LetterProgressUserRecipientAPIView(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = LetterProgressSerializer
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        queryset = LetterProgress.objects.filter(recipient=user, letter__is_active=True)
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+
+class LetterProgressCreateApprovedAPIView(generics.CreateAPIView):
+    serializer_class = LetterProgressCreateApprovedSerializer
+    queryset = LetterProgress.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.context['user'] = user
+        serializer.is_valid(raise_exception=True)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class LetterProgressCreateRejectedAPIView(generics.CreateAPIView):
+    serializer_class = LetterProgressCreateRejectedSerializer
+    queryset = LetterProgress.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.context['user'] = request.user
+        serializer.is_valid(raise_exception=True)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)    

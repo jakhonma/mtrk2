@@ -9,12 +9,13 @@ from rest_framework import exceptions
 from mtrk.settings import MEDIA_ROOT
 from django.core.files.storage import default_storage
 from utils.generator import code_generator
+from utils.qrcode import create_qrcode
 from authentication.models import User
 from controller.models import Channel
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-
-pdfmetrics.registerFont(TTFont('DejaVuSans', 'static/DejaVuSans.ttf'))
+import fitz
+from utils.generator import code_generator, random_generator
 
 def add_letter(data):
     code = code_generator()
@@ -75,64 +76,61 @@ def add_letter(data):
 
 
 # @shared_task
-# def edit_channel_derictor(input_pdf, username, pk):
-#     notice = Notice.objects.get(pk=pk)
-#     # 1. QR-kodni yaratish
-#     input_pdf = MEDIA_ROOT / input_pdf
-#     qr_data = f"Foydalanuvchi: {username}\nVaqt: {timezone.now().strftime('%d.%m.%Y %H:%M:%S')}"
-#     pdf_document = fitz.open(input_pdf)
+def edit_channel_derictor(input_pdf, username, pk):
+    # notice = Notice.objects.get(pk=pk)
+    # 1. QR-kodni yaratish
+    input_pdf = MEDIA_ROOT / input_pdf
+    qr_data = f"Foydalanuvchi: {username}\nVaqt: {timezone.now().strftime('%d.%m.%Y %H:%M:%S')}"
+    pdf_document = fitz.open(input_pdf)
     
-#     # QR-kodni yaratish
-#     qr_code_image = create_qrcode(qr_data)
+    # QR-kodni yaratish
+    qr_code_image = create_qrcode(qr_data)
 
-#     # Har bir sahifani tahrirlash
-#     for page in pdf_document:
-#         # Matnni sahifaga qo'shish
-#         page.insert_text((90, 730), "direktori", fontsize=12, color=(0, 0, 0))  # (x, y) koordinatalar
-#         page.insert_text((460, 740), username, fontsize=12, color=(0, 0, 0))  # (x, y) koordinatalar
-#         # QR-kodni sahifaga joylashtirish
-#         rect = fitz.Rect(370, 700, 450, 780)  # QR-kod uchun joy (x1, y1, x2, y2)
-#         page.insert_image(rect, stream=qr_code_image)
-#     lst = str(input_pdf).split("\\")
-#     lst[len(lst)-1] = '222222222222222222.pdf'
-#     output_pdf = ''
-#     for item in lst:
-#         output_pdf += item + '/'
-#     # Yangi PDFni saqlash
-#     # a = input_pdf
-#     # os.remove(input_pdf)
-#     print(output_pdf)
-#     pdf_document.save(output_pdf[:-1])
-#     path = output_pdf.split('/media/')[-1][:-1]
-#     notice.file = path
-#     notice.save()
-#     if default_storage.exists(input_pdf):
-#         default_storage.delete(input_pdf)
+    # Har bir sahifani tahrirlash
+    for page in pdf_document:
+        # QR-kodni sahifaga joylashtirish
+        rect = fitz.Rect(370, 700, 450, 780)  # QR-kod uchun joy (x1, y1, x2, y2)
+        page.insert_image(rect, stream=qr_code_image)
+    lst = str(input_pdf).split("\\")
+    lst[len(lst)-1] = f'{random_generator()}.pdf'
+    output_pdf = ''
+    for item in lst:
+        output_pdf += item + '/'
+    # Yangi PDFni saqlash
+    # a = input_pdf
+    # os.remove(input_pdf)
+    print(output_pdf)
+    pdf_document.save(output_pdf[:-1])
+    path = output_pdf.split('/media/')[-1][:-1]
+    # notice.file = path
+    # notice.save()
+    if default_storage.exists(input_pdf):
+        default_storage.delete(input_pdf)
     
 
 # @shared_task
-# def edit_archive_derictor(input_pdf, username, pk):
-#     notice = Notice.objects.get(pk=pk)
-#     # 1. QR-kodni yaratish
-#     input_pdf = MEDIA_ROOT / input_pdf
-#     qr_data = f"Foydalanuvchi: {username}\nVaqt: {timezone.now().strftime('%d.%m.%Y %H:%M:%S')}"
-#     pdf_document = fitz.open(input_pdf)
+def edit_archive_derictor(input_pdf, username, pk):
+    # notice = Notice.objects.get(pk=pk)
+    # 1. QR-kodni yaratish
+    input_pdf = MEDIA_ROOT / input_pdf
+    qr_data = f"Foydalanuvchi: {username}\nVaqt: {timezone.now().strftime('%d.%m.%Y %H:%M:%S')}"
+    pdf_document = fitz.open(input_pdf)
     
-#     # QR-kodni yaratish
-#     qr_code_image = create_qrcode(qr_data)
+    # QR-kodni yaratish
+    qr_code_image = create_qrcode(qr_data)
 
-#     # Har bir sahifani tahrirlash
-#     for page in pdf_document:
-#         # QR-kodni sahifaga joylashtirish
-#         rect = fitz.Rect(70, 60, 140, 130)  # QR-kod uchun joy (x1, y1, x2, y2)
-#         page.insert_image(rect, stream=qr_code_image)
-#     lst = str(input_pdf).split("\\")
-#     lst[len(lst)-1] = '333333333333333333333.pdf'
-#     output_pdf = ''
-#     for item in lst:
-#         output_pdf += item + '/'
-#     # Yangi PDFni saqlash
-#     pdf_document.save(output_pdf[:-1])
-#     path = output_pdf.split('/media/')[-1][:-1]
-#     notice.file = path
-#     notice.save()
+    # Har bir sahifani tahrirlash
+    for page in pdf_document:
+        # QR-kodni sahifaga joylashtirish
+        rect = fitz.Rect(70, 60, 140, 130)  # QR-kod uchun joy (x1, y1, x2, y2)
+        page.insert_image(rect, stream=qr_code_image)
+    lst = str(input_pdf).split("\\")
+    lst[len(lst)-1] = f'{random_generator()}.pdf'
+    output_pdf = ''
+    for item in lst:
+        output_pdf += item + '/'
+    # Yangi PDFni saqlash
+    pdf_document.save(output_pdf[:-1])
+    path = output_pdf.split('/media/')[-1][:-1]
+    # notice.file = path
+    # notice.save()

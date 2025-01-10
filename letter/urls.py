@@ -7,10 +7,10 @@ router.register('sender', views.SenderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-
-    path('letter-create/', views.LetterCreateAPIView.as_view()),
     path('user-notification-list/', views.UserNotificationListAPIView.as_view()),
 
-
-    path('user-letter-progress-list/', views.LetterProgressAPIView.as_view()),
+    path('letter-create/', views.LetterCreateAPIView.as_view()),
+    path('user-letter-progress-all/', views.LetterProgressUserAllAPIView.as_view()),
+    path('user-letter-progress-sent/', views.LetterProgressUserSentAPIView.as_view()),
+    path('user-letter-progress-recipient/', views.LetterProgressUserRecipientAPIView.as_view())
 ]

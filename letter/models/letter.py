@@ -3,25 +3,7 @@ from django.core.validators import FileExtensionValidator
 from utils.directory import directory_path
 from letter.models import Sender
 from controller.models import Channel
-
-
-class Progress(models.TextChoices):
-    CREATED = 'CREATED', 'Created'
-    CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR', 'Channel Director'
-    ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR', 'Archive Director'
-    ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE', 'Archive Employee'
-    FINISHED = 'FINISHED', 'Finished'
-    CANCELED = 'CANCELED', 'Cancelled'
-
-
-class LetterType(models.TextChoices):
-    NOTICE = 'notice', 'Notice'  # Bildirishnoma
-    APPLICATION = 'application', 'Application' #Ariza xati
-    # OFFICIAL = 'official', 'Official'  # Rasmiy xat
-    # PERSONAL = 'personal', 'Personal'  # Shaxsiy xat
-    # INVITATION = 'invitation', 'Invitation'  # Taklifnoma
-    # REQUEST = 'request', 'Request'  # So'rov xati
-    # OTHER = 'other', 'Other'  # Boshqa
+from utils.choices import Progress, LetterType
 
 
 class Letter(models.Model):

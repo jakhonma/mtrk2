@@ -1,4 +1,3 @@
-
 def not_serials(queryset):
     not_ = []
     if queryset.exists():

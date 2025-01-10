@@ -5,7 +5,9 @@ from authentication.serializers import UserSerializer
 
 class ChannelSerializer(serializers.ModelSerializer):
     director = UserSerializer(read_only=True)
+    assistant = UserSerializer(read_only=True)
+
     class Meta:
         model = Channel
-        fields = ['id', 'name', 'director', 'phone', 'employee']
+        fields = ['id', 'name', 'director', 'assistant', 'phone', 'employee', 'code']
 

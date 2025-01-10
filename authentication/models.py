@@ -9,10 +9,11 @@ from authentication.managers import (
     ArchiveDirectorManager, 
     ChannelDirectorManager, 
     ArchiveEmployeeManager, 
+    ChannelAssistantManager,
     ChannelEmployeeManager, 
     LowUserManager
 )
-from utils.choices import UserRoleEnum
+from utils.choices import UserRole
 
 
 class UserRoles(models.Model):
@@ -21,16 +22,20 @@ class UserRoles(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+# class UserRole(models.TextChoices):
+#         ADMIN = 'ADMIN', 'ADMIN'
+#         ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR', 'ARCHIVE_DIRECTOR'
+#         CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR', 'CHANNEL_DIRECTOR'
+#         ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE', 'ARCHIVE_EMPLOYEE'
+#         CHANNEL_ASSISTANT = 'CHANNEL_ASSISTANT', 'CHANNEL_ASSISTANT'
+#         CHANNEL_EMPLOYEE = 'CHANNEL_EMPLOYEE', 'CHANNEL_EMPLOYEE'
+#         LOW_USER = 'LOW_USER', 'LOW_USER'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    class UserRole(models.TextChoices):
-        ADMIN = 'ADMIN', 'ADMIN'
-        ARCHIVE_DIRECTOR = 'ARCHIVE_DIRECTOR', 'ARCHIVE_DIRECTOR'
-        CHANNEL_DIRECTOR = 'CHANNEL_DIRECTOR', 'CHANNEL_DIRECTOR'
-        ARCHIVE_EMPLOYEE = 'ARCHIVE_EMPLOYEE', 'ARCHIVE_EMPLOYEE'
-        CHANNEL_EMPLOYEE = 'CHANNEL_EMPLOYEE', 'CHANNEL_EMPLOYEE'
-        LOW_USER = 'LOW_USER', 'LOW_USER'
+    
 
     username = models.CharField(
         _("username"),
@@ -119,7 +124,7 @@ class AdminUser(User):
     objects = AdminManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.ADMIN
+        self.role = UserRole.ADMIN
         return super().save(*args, **kwargs)
 
 
@@ -132,7 +137,7 @@ class ArchiveDirectorUser(User):
     objects = ArchiveDirectorManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.ARCHIVE_DIRECTOR
+        self.role = UserRole.ARCHIVE_DIRECTOR
         return super().save(*args, **kwargs)
 
 
@@ -145,7 +150,20 @@ class ChannelDirectorUser(User):
     objects = ChannelDirectorManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.CHANNEL_DIRECTOR
+        self.role = UserRole.CHANNEL_DIRECTOR
+        return super().save(*args, **kwargs)
+
+
+class ChannelAssistantUser(User):
+    class Meta:
+        proxy = True
+        verbose_name = _("channel assistant")
+        verbose_name_plural = _("channel assistant")
+
+    objects = ChannelAssistantManager()
+
+    def save(self, *args, **kwargs):
+        self.role = UserRole.CHANNEL_ASSISTANT
         return super().save(*args, **kwargs)
 
 
@@ -158,7 +176,7 @@ class ArchiveEmployeeUser(User):
     objects = ArchiveEmployeeManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.ARCHIVE_EMPLOYEE
+        self.role = UserRole.ARCHIVE_EMPLOYEE
         return super().save(*args, **kwargs)
 
 
@@ -171,7 +189,7 @@ class ChannelEmployeeUser(User):
     objects = ChannelEmployeeManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.CHANNEL_EMPLOYEE
+        self.role = UserRole.CHANNEL_EMPLOYEE
         return super().save(*args, **kwargs)
 
 
@@ -184,5 +202,5 @@ class LowUser(User):
     objects = LowUserManager()
 
     def save(self, *args, **kwargs):
-        self.role = self.UserRole.LOW_USER
+        self.role = UserRole.LOW_USER
         return super().save(*args, **kwargs)

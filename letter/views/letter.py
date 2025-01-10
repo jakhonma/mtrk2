@@ -1,15 +1,16 @@
-from rest_framework import viewsets, views, generics, response, permissions, status, parsers
+from rest_framework import generics, response, permissions, status, parsers
 from letter.models import Letter, Notification, LetterAction, LetterProgress, Progress
 from letter.serializers import LetterCreateUpdateSerializer
 from letter.task import add_letter
 from django.db import transaction
+from letter.permissions import IsChannelEmployeePermission
 
 
 class LetterCreateAPIView(generics.CreateAPIView):
     """
         Create a model instance.
     """
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated,]
     parser_classes = (parsers.MultiPartParser, parsers.FormParser)
     serializer_class = LetterCreateUpdateSerializer
     queryset = Letter.objects.all()
@@ -24,9 +25,7 @@ class LetterCreateAPIView(generics.CreateAPIView):
             letter = serializer.save()
             LetterProgress.objects.create(
                 letter=letter,
-                status=Progress.CREATED,
-                changed_by=request.user,
-                action=LetterAction.APPROVED
+                recipient=request.user
             )
             Notification.objects.create(
                 recipient=request.user,
@@ -39,7 +38,7 @@ class LetterCreateAPIView(generics.CreateAPIView):
 
 class LetterListAPIView(generics.ListAPIView):
     """
-        List a queryset.
+        List a queryset.    
     """
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

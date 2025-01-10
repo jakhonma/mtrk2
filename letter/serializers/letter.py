@@ -2,9 +2,11 @@ from rest_framework import serializers
 from letter.models import Letter
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+from controller.serializers import ChannelSerializer
 
 
 class LetterListSerializer(serializers.ModelSerializer):
+    channel = ChannelSerializer()
     class Meta:
         model = Letter
         fields = '__all__'
