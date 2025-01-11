@@ -23,4 +23,4 @@ class LetterProgress(models.Model):
         ordering=['-updated']
 
     def __str__(self):
-        return f"Letter {self.letter.pk}: {self.status} by {self.changed_by.username}"
+        return f"Letter {self.pk}:by {self.letter.pk}"

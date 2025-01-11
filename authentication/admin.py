@@ -1,5 +1,5 @@
 from django.contrib import admin
-from authentication.models import User, AdminUser, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles
+from authentication.models import User, AdminUser, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles, ChannelAssistantUser
 from django.utils.translation import gettext_lazy as _
 from .models import AdminUser
 
@@ -15,4 +15,4 @@ class AdminUserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AdminUser, AdminUserAdmin)
-admin.site.register([User, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles])
+admin.site.register([User, ArchiveDirectorUser, ChannelDirectorUser, ArchiveEmployeeUser, ChannelEmployeeUser, LowUser, UserRoles, ChannelAssistantUser])

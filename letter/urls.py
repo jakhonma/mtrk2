@@ -10,7 +10,11 @@ urlpatterns = [
     path('user-notification-list/', views.UserNotificationListAPIView.as_view()),
 
     path('letter-create/', views.LetterCreateAPIView.as_view()),
+
+    path('user-letter-progress-approved/', views.LetterProgressCreateApprovedAPIView.as_view()),
+    path('user-letter-progress-rejected/', views.LetterProgressCreateRejectedAPIView.as_view()),
+
     path('user-letter-progress-all/', views.LetterProgressUserAllAPIView.as_view()),
-    path('user-letter-progress-sent/', views.LetterProgressUserSentAPIView.as_view()),
+    path('user-letter-progress-send/', views.LetterProgressUserSentAPIView.as_view()),
     path('user-letter-progress-recipient/', views.LetterProgressUserRecipientAPIView.as_view())
 ]

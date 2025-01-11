@@ -1,9 +1,8 @@
 from rest_framework import serializers, exceptions
-from letter.models import LetterProgress, Letter
+from letter.models import LetterProgress
 from letter.serializers import LetterListSerializer
 from controller.serializers import ChannelSerializer
 from utils.choices import LetterAction, Progress, UserRole
-from authentication.models import User
 from controller.models import Archive
 from letter.task import edit_channel_derictor
 
@@ -16,7 +15,7 @@ class LetterProgressSerializer(serializers.ModelSerializer):
 
 
 class LetterProgressCreateApprovedSerializer(serializers.Serializer):
-    letter_progress_id = serializers.IntegerField()
+    letter_progress_id = serializers.IntegerField(required=False)
     recipient_id = serializers.IntegerField(required=False)
     action = serializers.CharField()
 
@@ -29,7 +28,7 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
         }
         user = self.context['user']
         action = validated_data.pop('action')
-        letter_progress_id = validated_data.get('letter_progress_id')
+        letter_progress_id = validated_data.pop('letter_progress_id')
 
         try:
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
@@ -38,7 +37,7 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
             letter = letter_progress.letter
             letter.progress = progress_mapping.get(letter.progress)
             if user.role == UserRole.CHANNEL_EMPLOYEE:
-                new_letter_progress = LetterProgress.objects.create(sent_id=user.id, **validated_data)
+                new_letter_progress = LetterProgress.objects.create(letter_id=letter.pk, sent_id=user.id, **validated_data)
             elif user.role == UserRole.CHANNEL_DIRECTOR or user.role == UserRole.CHANNEL_ASSISTANT:
                 archive = Archive.objects.all().first()
                 letter.pdf = edit_channel_derictor(letter.pdf, data=None)
@@ -56,28 +55,24 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
 
 
 class LetterProgressCreateRejectedSerializer(serializers.Serializer):
-    letter_id = serializers.IntegerField()
-    letter_progress_id = serializers.IntegerField()
-    recipient_id = serializers.IntegerField(required=False)
-    action = serializers.CharField()
+    letter_progress_id = serializers.IntegerField(required=False)
 
     def create(self, validated_data):
         user = self.context['user']
-        action = validated_data.pop('action')
-        letter_id = validated_data.get('letter_id')
-        letter_progress_id = validated_data.get('letter_progress_id')
+        letter_progress_id = validated_data.pop('letter_progress_id')
         try:
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
-            letter_progress.action = action
+            letter_progress.action = LetterAction.REJECTED
             letter_progress.save()
-            letter = Letter.objects.get(pk=letter_id)
+            letter = letter_progress.letter
             letter.progress = Progress.CANCELED
             letter.save()
             
             return LetterProgress.objects.create(
-                send_id=user.id, 
+                letter_id=letter.id,
+                sent_id=user.id, 
                 recipient_id=letter.created_by.id, 
-                action=action, 
+                action=LetterAction.REJECTED, 
                 **validated_data
             )
         except LetterProgress.DoesNotExist:
