@@ -29,6 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserResponsibleSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    full_name = serializers.CharField(max_length=200)
+
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()

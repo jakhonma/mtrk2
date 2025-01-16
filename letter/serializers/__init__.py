@@ -1,4 +1,10 @@
-from letter.serializers.sender import SenderSerializer
 from letter.serializers.letter import LetterListSerializer, LetterCreateUpdateSerializer
-from letter.serializers.notification import NotificationSerializer
-from letter.serializers.letter_progress import LetterProgressSerializer, LetterProgressCreateApprovedSerializer, LetterProgressCreateRejectedSerializer
+from letter.serializers.letter_progress import (
+    LetterProgressSerializer, 
+    LetterProgressCreateApprovedSerializer, 
+    LetterProgressCreateRejectedSerializer,
+    LetterProgressCreateChannelEmployeeSerializer,
+    LetterProgressCreateChannelDirectorOrChannelAssistantSerializer,
+    LetterProgressCreateArchiveDirectorSerializer,
+    LetterProgressCreateArchiveEmployeeSerializer
+)

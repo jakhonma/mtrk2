@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 from utils.directory import directory_path
-from letter.models import Sender
 from controller.models import Channel
 from utils.choices import Progress, LetterType
 
@@ -27,18 +26,12 @@ class Letter(models.Model):
         on_delete=models.CASCADE, 
         related_name='created_letters'
     )
-    current_user = models.ForeignKey(
-        'authentication.User', 
-        on_delete=models.SET_NULL, 
-        related_name='processing_letters',
-        null=True,
-        blank=True
-    )
     progress = models.CharField(
         max_length=18, 
         choices=Progress.choices, 
         default=Progress.CREATED
     )
+    phone = models.CharField(max_length=30)
     description = models.CharField(max_length=800)
     is_active = models.BooleanField(default=True)
     start_date = models.DateTimeField(auto_now_add=True)

@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         },
     )
     full_name = models.CharField(
-        _("first name"),
+        _("full name"),
         max_length=200,
         blank=True
     )

@@ -14,6 +14,5 @@ urlpatterns = [
     path('user/', views.AuthenticationUser.as_view(), name='user'),
     path('user-bookmark-delete/', views.UserBookMarkClearView.as_view(), name='user-bookmark-delete'),
     path('password-change-with-old/', views.PasswordChangeWithOldView.as_view(), name='password-change-with-old'),
-    path('user-notification-count/', views.UserNotificationAPIView.as_view()),
     path('', include(router.urls)),
 ]
