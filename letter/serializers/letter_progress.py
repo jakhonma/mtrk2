@@ -5,8 +5,7 @@ from utils.choices import LetterAction, Progress, UserRole
 from controller.models import Archive
 from authentication.models import ArchiveEmployeeUser
 from letter.task import edit_channel_director, edit_archive_director
-from django.core.files.storage import default_storage
-
+from utils.delete_pdf_file import delete_pdf_file
 
 class LetterProgressSerializer(serializers.ModelSerializer):
     letter = LetterListSerializer()
@@ -82,8 +81,7 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
                     letter.pdf, delete_pdf = edit_channel_director(letter, user=user)
                     letter_progress.save()
                     letter.save()
-                    if default_storage.exists(delete_pdf):
-                        default_storage.delete(delete_pdf)
+                    delete_pdf_file(delete_pdf)
                     return LetterProgress.objects.create(
                         letter_id=letter.pk, 
                         sent_id=user.pk, 
@@ -99,8 +97,8 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
                     letter.pdf, delete_pdf = edit_archive_director(letter, user=user)
                     letter_progress.save()
                     letter.save()
-                    if default_storage.exists(delete_pdf):
-                        default_storage.delete(delete_pdf)
+                    delete_pdf_file(delete_pdf)
+
                     return LetterProgress.objects.create(
                         letter_id=letter.pk, 
                         sent_id=user.pk, 
@@ -120,7 +118,6 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
 class LetterProgressCreateChannelEmployeeSerializer(serializers.Serializer):
     letter_progress_id = serializers.IntegerField(required=False)
     recipient_id = serializers.IntegerField()
-    action = serializers.CharField()
 
     def create(self, validated_data):
         user = self.context['user']
@@ -146,7 +143,6 @@ class LetterProgressCreateChannelEmployeeSerializer(serializers.Serializer):
 
 class LetterProgressCreateChannelDirectorOrChannelAssistantSerializer(serializers.Serializer):
     letter_progress_id = serializers.IntegerField(required=False)
-    recipient_id = serializers.IntegerField(allow_null=True)
 
     def create(self, validated_data):
         user = self.context['user']
@@ -156,18 +152,17 @@ class LetterProgressCreateChannelDirectorOrChannelAssistantSerializer(serializer
             if letter_progress.action is None:
                 archive = Archive.objects.all().first()
                 letter_progress.action = LetterAction.APPROVED
-                validated_data.pop('recipient_id')
                 letter = letter_progress.letter
                 letter.archive_directory()
                 letter.pdf, delete_pdf = edit_channel_director(letter, user=user)
+                letter_progress.action = LetterAction.APPROVED
                 letter_progress.save()
-                if default_storage.exists(delete_pdf):
-                    default_storage.delete(delete_pdf)
+                delete_pdf_file(delete_pdf)
+
                 return LetterProgress.objects.create(
                     letter_id=letter.pk, 
                     sent_id=user.pk, 
                     recipient_id=archive.director.pk,
-                    action=LetterAction.APPROVED
                 )
             else:
                 raise exceptions.ValidationError({"msg": "Bu Xat tasdiqlangan!"})
@@ -189,6 +184,7 @@ class LetterProgressCreateArchiveDirectorSerializer(serializers.Serializer):
         try:
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
             if letter_progress.action is not None:
+                letter_progress_list = []
                 letter = letter_progress.letter
                 letter.archive_employee()
                 recipient_ids = validated_data.pop('recipient_ids')
@@ -196,17 +192,18 @@ class LetterProgressCreateArchiveDirectorSerializer(serializers.Serializer):
                     letter=letter,
                     user=user
                 )
+                letter_progress.action = LetterAction.APPROVED
                 letter_progress.save()
-                if default_storage.exists(delete_pdf):
-                    default_storage.delete(delete_pdf)
+                delete_pdf_file(delete_pdf)
+
                 for item in recipient_ids:
-                    new_letter_progress = LetterProgress.objects.create(
+                    letter_progress_list.append(LetterProgress.objects.create(
                         letter_id=letter.pk, 
                         sent_id=user.pk, 
                         recipient_id=item, 
-                        action=LetterAction.APPROVED 
-                    )
-                return new_letter_progress
+                    ))
+                letter_progress_list = LetterProgress.objects.bulk_create(letter_progress_list)
+                return letter_progress_list[0]
             else:
                 raise exceptions.ValidationError({"msg": "Bu Xat tasdiqlangan!"})
         except LetterProgress.DoesNotExist:
@@ -223,7 +220,7 @@ class LetterProgressCreateArchiveEmployeeSerializer(serializers.Serializer):
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
             if letter_progress.action is None:
                 letter = letter_progress.letter
-                letter.archive_finished()
+                letter.finished()
             else:
                 raise exceptions.ValidationError({"msg": "Bu Xat tasdiqlangan!"})
         except LetterProgress.DoesNotExist:

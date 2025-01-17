@@ -95,7 +95,18 @@ class LetterProgressUserRecipientAPIView(LetterProgressUserList):
         queryset = LetterProgress.objects.exclude(letter__created_by=user).filter(
             recipient=user,
             letter__is_active=True
-        )
+        ).order_by('is_read', '-letter__updated')
+        # queryset = LetterProgress.objects.exclude(letter__created_by=user).filter(
+        #     recipient=user,
+        #     letter__is_active=True
+        # ).annotate(
+        #             combined_field=functions.Concat(
+        #                 'letter',
+        #                 Value('_'),
+        #                 'recipient',
+        #                 output_field=CharField()
+        #             )
+        #         ).order_by('-combined_field', 'is_read').distinct('combined_field')
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
 

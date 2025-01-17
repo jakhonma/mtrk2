@@ -31,7 +31,7 @@ urlpatterns = [
         views.LetterProgressCreateChannelEmployeeAPIView.as_view()
     ),
     path(
-        'user-letter-progress-channel-director-or-assistent-approved/',
+        'user-letter-progress-channel-director-or-assistant-approved/',
         views.LetterProgressCreateChannelDirectorOrChannelAssistantAPIView.as_view()
     ),
     path(

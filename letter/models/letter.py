@@ -59,7 +59,7 @@ class Letter(models.Model):
             return True
         return False
 
-    def archive_finished(self):
+    def finished(self):
         if self.progress == Progress.ARCHIVE_EMPLOYEE:
             self.progress = Progress.FINISHED
             self.is_active = False
