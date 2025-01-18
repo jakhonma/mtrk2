@@ -23,7 +23,7 @@ class LetterProgressCreateRejectedSerializer(serializers.Serializer):
         letter_progress_id = validated_data.pop('letter_progress_id')
         try:
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
-            if letter_progress.action == LetterAction.APPROVED or letter_progress.action == LetterAction.REJECTED:
+            if letter_progress.action is None:
                 letter_progress.action = LetterAction.REJECTED
                 letter_progress.save()
                 letter = letter_progress.letter
@@ -55,7 +55,6 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
             'ARCHIVE_EMPLOYEE': 'FINISHED',  # FINISHED bosqichi uchun oluvchi yo'q
         }
         user = self.context['user']
-        action = validated_data.pop('action')
         letter_progress_id = validated_data.pop('letter_progress_id')
 
         try:
@@ -98,13 +97,13 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
                     letter_progress.save()
                     letter.save()
                     delete_pdf_file(delete_pdf)
-
-                    return LetterProgress.objects.create(
+                    new_letter_progress = LetterProgress.objects.create(
                         letter_id=letter.pk, 
                         sent_id=user.pk, 
                         recipient=archive.employee.all().first(),
                         action=LetterAction.APPROVED
                     )
+                    return new_letter_progress
                 elif user.role == UserRole.ARCHIVE_EMPLOYEE:
                     pass
                 else:
@@ -118,23 +117,22 @@ class LetterProgressCreateApprovedSerializer(serializers.Serializer):
 class LetterProgressCreateChannelEmployeeSerializer(serializers.Serializer):
     letter_progress_id = serializers.IntegerField(required=False)
     recipient_id = serializers.IntegerField()
-
     def create(self, validated_data):
         user = self.context['user']
         letter_progress_id = validated_data.pop('letter_progress_id')
-
         try:
             letter_progress = LetterProgress.objects.get(pk=letter_progress_id)
             if letter_progress.action is None:
                 letter = letter_progress.letter
-                letter.channel_directory()
                 letter_progress.action = LetterAction.APPROVED
+                letter.channel_directory()
                 letter_progress.save()
-                return LetterProgress.objects.create(
+                new_letter_progress = LetterProgress.objects.create(
                     letter_id=letter.pk, 
                     sent_id=user.id, 
                     **validated_data
                 )
+                return new_letter_progress
             else:
                 raise exceptions.ValidationError({"msg": "Bu Xat tasdiqlangan!"})
         except LetterProgress.DoesNotExist:
@@ -153,17 +151,17 @@ class LetterProgressCreateChannelDirectorOrChannelAssistantSerializer(serializer
                 archive = Archive.objects.all().first()
                 letter_progress.action = LetterAction.APPROVED
                 letter = letter_progress.letter
-                letter.archive_directory()
                 letter.pdf, delete_pdf = edit_channel_director(letter, user=user)
                 letter_progress.action = LetterAction.APPROVED
+                letter.archive_directory()
                 letter_progress.save()
-                delete_pdf_file(delete_pdf)
-
-                return LetterProgress.objects.create(
+                new_letter_progress = LetterProgress.objects.create(
                     letter_id=letter.pk, 
                     sent_id=user.pk, 
-                    recipient_id=archive.director.pk,
+                    recipient_id=archive.director.pk
                 )
+                delete_pdf_file(delete_pdf)
+                return new_letter_progress
             else:
                 raise exceptions.ValidationError({"msg": "Bu Xat tasdiqlangan!"})
         except LetterProgress.DoesNotExist:
@@ -176,9 +174,7 @@ class LetterProgressCreateArchiveDirectorSerializer(serializers.Serializer):
         queryset=ArchiveEmployeeUser.objects.all(),
         many=True
     )
-
     def create(self, validated_data):
-        new_letter_progress = None
         user = self.context['user']
         letter_progress_id = validated_data.pop('letter_progress_id')
         try:
@@ -186,21 +182,21 @@ class LetterProgressCreateArchiveDirectorSerializer(serializers.Serializer):
             if letter_progress.action is not None:
                 letter_progress_list = []
                 letter = letter_progress.letter
-                letter.archive_employee()
                 recipient_ids = validated_data.pop('recipient_ids')
                 letter.pdf, delete_pdf = edit_archive_director(
                     letter=letter,
                     user=user
                 )
                 letter_progress.action = LetterAction.APPROVED
+                letter.archive_employee()
                 letter_progress.save()
                 delete_pdf_file(delete_pdf)
-
                 for item in recipient_ids:
-                    letter_progress_list.append(LetterProgress.objects.create(
-                        letter_id=letter.pk, 
-                        sent_id=user.pk, 
-                        recipient_id=item, 
+                    letter_progress_list.append(
+                        LetterProgress.objects.create(
+                            letter_id=letter.pk, 
+                            sent_id=user.pk, 
+                            recipient_id=item, 
                     ))
                 letter_progress_list = LetterProgress.objects.bulk_create(letter_progress_list)
                 return letter_progress_list[0]

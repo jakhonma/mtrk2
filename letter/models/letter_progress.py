@@ -45,6 +45,7 @@ class LetterProgress(models.Model):
         if LetterProgress.objects.filter(
             letter=self.letter,
             recipient=self.recipient,
+            sent=self.sent,
             letter__progress=self.letter.progress
         ).exclude(id=self.id).exists():
             raise ValidationError("letter, recipient, va letter progress unique.")
