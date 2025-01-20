@@ -1,7 +1,7 @@
 from letter.serializers.letter import LetterListSerializer, LetterCreateUpdateSerializer
 from letter.serializers.letter_progress import (
     LetterProgressSerializer, 
-    LetterProgressCreateApprovedSerializer, 
+    # LetterProgressCreateApprovedSerializer, 
     LetterProgressCreateRejectedSerializer,
     LetterProgressCreateChannelEmployeeSerializer,
     LetterProgressCreateChannelDirectorOrChannelAssistantSerializer,

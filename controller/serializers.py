@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from controller.models import Channel, Archive
-from authentication.serializers import UserSerializer
+from authentication.serializers import UserSerializer, UserResponsibleSerializer
 
 
 class ChannelSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class ChannelSerializer(serializers.ModelSerializer):
 
 
 class ArchiveSerializer(serializers.ModelSerializer):
-    employee = UserSerializer(read_only=True, many=True)
+    employee = UserResponsibleSerializer(read_only=True, many=True)
 
     class Meta:
         model = Archive

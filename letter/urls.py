@@ -4,10 +4,10 @@ from letter import views
 urlpatterns = [
     path('letter-create/', views.LetterCreateAPIView.as_view()),
 
-    path(
-        'user-letter-progress-approved/',
-        views.LetterProgressCreateApprovedAPIView.as_view()
-    ),
+    # path(
+    #     'user-letter-progress-approved/',
+    #     views.LetterProgressCreateApprovedAPIView.as_view()
+    # ),
     path(
         'user-letter-progress-rejected/',
         views.LetterProgressCreateRejectedAPIView.as_view()
@@ -55,5 +55,9 @@ urlpatterns = [
     path(
         'user-letter-progress-recipient/',
         views.LetterProgressUserRecipientAPIView.as_view()
+    ),
+    path(
+        'user-letter-progress-cancel/',
+        views.LetterProgressUserCancelAPIView.as_view()
     )
 ]

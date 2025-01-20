@@ -1,7 +1,7 @@
 from rest_framework import permissions, response, generics, status
 from letter.serializers import (
     LetterProgressSerializer, 
-    LetterProgressCreateApprovedSerializer, 
+    # LetterProgressCreateApprovedSerializer, 
     LetterProgressCreateRejectedSerializer,
     LetterProgressCreateChannelEmployeeSerializer,
     LetterProgressCreateChannelDirectorOrChannelAssistantSerializer,
@@ -92,6 +92,12 @@ class LetterProgressUserSentAPIView(LetterProgressUserList):
 class LetterProgressUserRecipientAPIView(LetterProgressUserList):
     def list(self, request, *args, **kwargs):
         user = request.user
+        # if user.role == UserRole.CHANNEL_EMPLOYEE:
+        #         queryset = LetterProgress.objects.filter(
+        #         recipient=user,
+        #         letter__is_active=True
+        #     ).order_by('is_read', '-letter__updated')
+        # else:
         queryset = LetterProgress.objects.exclude(letter__created_by=user).filter(
             recipient=user,
             letter__is_active=True
@@ -107,6 +113,18 @@ class LetterProgressUserRecipientAPIView(LetterProgressUserList):
         #                 output_field=CharField()
         #             )
         #         ).order_by('-combined_field', 'is_read').distinct('combined_field')
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+
+class LetterProgressUserCancelAPIView(LetterProgressUserList):
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        queryset = LetterProgress.objects.filter(
+            sent=user,
+            letter__progress=Progress.CANCELED,
+            letter__is_active=True
+        )
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
 
@@ -148,8 +166,8 @@ class LetterProgressCreate(generics.CreateAPIView):
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class LetterProgressCreateApprovedAPIView(LetterProgressCreate):
-    serializer_class = LetterProgressCreateApprovedSerializer
+# class LetterProgressCreateApprovedAPIView(LetterProgressCreate):
+#     serializer_class = LetterProgressCreateApprovedSerializer
 
 
 class LetterProgressCreateChannelEmployeeAPIView(LetterProgressCreate):

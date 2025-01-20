@@ -23,7 +23,7 @@ def new_pdf_doc(letter, user, x, y):
     qr_code_image = create_qrcode(qr_data)
 
     first_page = pdf_document[0]
-    rect = fitz.Rect(x, y, x + 50, y + 50)
+    rect = fitz.Rect(x, y, x + 45, y + 45)
     first_page.insert_image(rect, stream=qr_code_image)
 
     # for page in pdf_document:
@@ -33,13 +33,15 @@ def new_pdf_doc(letter, user, x, y):
     new_input_pdf = doc_path.new_input_pdf_path(input_pdf=input_pdf)
     pdf_document.save(new_input_pdf)
     path = new_input_pdf.split('/media/')[-1]
+    # letter.pdf = path
+    # letter.save()
     return path, input_pdf
 
 
 def edit_channel_director(letter, user):
-    return new_pdf_doc(letter=letter, user=user, x=290, y=750)
+    return new_pdf_doc(letter=letter, user=user, x=295, y=755)
 
 
 # @shared_task
 def edit_archive_director(letter, user):
-    return new_pdf_doc(letter=letter, user=user, x=70, y=60)
+    return new_pdf_doc(letter=letter, user=user, x=75, y=65)

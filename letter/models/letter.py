@@ -62,7 +62,6 @@ class Letter(models.Model):
     def finished(self):
         if self.progress == Progress.ARCHIVE_EMPLOYEE:
             self.progress = Progress.FINISHED
-            self.is_active = False
             self.save()
             return True
         return False

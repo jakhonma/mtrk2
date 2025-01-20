@@ -37,7 +37,7 @@ class LetterProgress(models.Model):
         ordering = ['-letter__updated']
         constraints = [
             models.UniqueConstraint(
-                fields=("letter", "recipient"), name="unique_progress"
+                fields=("letter", "sent", "recipient"), name="unique_progress"
             ),
         ]
     

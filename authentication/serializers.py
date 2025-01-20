@@ -20,6 +20,7 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}, }
 
 
 class UserSerializer(serializers.ModelSerializer):
