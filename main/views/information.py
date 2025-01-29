@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from main.filters import InformationFilter
 from django.db import transaction
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from utils.translate import to_lotin
 
 
 # class InformationViewSet(viewsets.ReadOnlyModelViewSet):
@@ -91,6 +92,68 @@ class InformationListAPIView(generics.ListAPIView):
                     distinct=True)
             ).order_by('-created')
         return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+
+class InformationLotinListAPIView(generics.ListAPIView):
+    serializer_class = InformationSerializer
+    authentication_classes = (JWTAuthentication, )
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = pagination.LimitOffsetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    ordering_fields = ['region', 'language', 'year']
+    search_fields = ['title', 'brief_data', 'summary', 'mtv_index', 'location_on_server']
+    filterset_class = InformationFilter
+
+    def get_queryset(self):
+        if not self.request.user.has_perm("can_confidential"):
+            queryset = (Information.objects.filter(confidential=False).annotate(
+                rating=Avg('ratings__rating'),
+                serial_count=Count(
+                    Case(
+                        When(is_serial=True, then='serials'),  # is_serial=True bo'lsa serialsni hisobla
+                        output_field=IntegerField()
+                    ),
+                    distinct=True)
+            ).order_by('-created'))
+        else:
+            queryset = Information.objects.annotate(
+                rating=Avg('ratings__rating'),
+                serial_count=Count(
+                    Case(
+                        When(is_serial=True, then='serials'),  # is_serial=True bo'lsa serialsni hisobla
+                        output_field=IntegerField()
+                    ),
+                    distinct=True)
+            ).order_by('-created')
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for item2 in serializer.data:
+                item2['title'] = to_lotin(item2['title'])
+                item2['fond']['name'] = to_lotin(item2['fond']['name'])
+                for item in item2['language']:
+                    item["name"] = to_lotin(item["name"])
+                
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
 
 
 class InformationRetrieveAPIView(generics.RetrieveAPIView):
@@ -111,6 +174,41 @@ class InformationRetrieveAPIView(generics.RetrieveAPIView):
         instance.rating = rating["rating"]
         serializer = self.get_serializer(instance)
         return response.Response(serializer.data)
+
+
+class InformationLotinRetrieveAPIView(generics.RetrieveAPIView):
+    authentication_classes = (JWTAuthentication, )
+    serializer_class = InformationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if not self.request.user.has_perm("can_confidential"):
+            queryset = Information.objects.filter(confidential=False)
+        else:
+            queryset = Information.objects.all()
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        rating = instance.ratings.all().aggregate(rating=Avg("rating", default=0))
+        instance.rating = rating["rating"]
+        serializer = self.get_serializer(instance)
+        info = serializer.data
+        info['brief_data'] = to_lotin(info['brief_data'])
+        info['summary'] = to_lotin(info['summary'])
+        info['title'] = to_lotin(info['title'])
+        info['fond']['name'] = to_lotin(info['fond']['name'])
+        if info['category']['parent'] is not None:
+            info['category']['parent']['name'] = to_lotin(info['category']['parent']['name'])
+            info['category']['name'] = to_lotin(info['category']['name'])
+        else:
+            info['category']['name'] = to_lotin(info['category']['name'])
+        for item in info['region']:
+            item['name'] = to_lotin(item['name'])
+        for item in info['language']:
+            item['name'] = to_lotin(item['name'])
+
+        return response.Response(info)
 
 
 class InformationCreateAPIView(generics.CreateAPIView):

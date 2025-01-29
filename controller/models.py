@@ -25,6 +25,7 @@ class Archive(models.Model):
     name = models.CharField(max_length=100)
     director = models.ForeignKey(ArchiveDirectorUser, on_delete=models.CASCADE, related_name='rel_archive_director')
     employee = models.ManyToManyField(ArchiveEmployeeUser, blank=True, related_name='rel_archive_employeis')
+    letter_work = models.ManyToManyField(ArchiveEmployeeUser, blank=True, related_name='rel_letter_work')
 
     def clean(self):
         # Agar modelda yozuv bo'lsa va yangi yozuv kiritilsa, xatolik qaytariladi

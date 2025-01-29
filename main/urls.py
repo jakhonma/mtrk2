@@ -4,7 +4,9 @@ from main import views
 urlpatterns = [
     # Information
     path('information/', views.InformationListAPIView.as_view()),
+    path('information-lotin/', views.InformationLotinListAPIView.as_view()),
     path('information/<int:pk>/', views.InformationRetrieveAPIView.as_view()),
+    path('information-lotin/<int:pk>/', views.InformationLotinRetrieveAPIView.as_view()),
     path('create-information/', views.InformationCreateAPIView.as_view()),
     path('edit-information/<int:pk>/', views.InformationUpdateAPIView.as_view()),
     path('delete-information/<int:pk>/', views.InformationDestroyAPIView.as_view()),

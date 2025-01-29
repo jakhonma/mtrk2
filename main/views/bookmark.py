@@ -5,6 +5,7 @@ from django.db import transaction
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from main.models import Bookmark, Information, Rating
 from main.serializers import BookmarkSerializer, BookmarkListSerializer, InformationSerializer
+from utils.translate import to_lotin
 
 
 class BookmarkListAPIView(generics.ListAPIView):
@@ -41,6 +42,37 @@ class BookmarkListAPIView(generics.ListAPIView):
         #     information.rating = rating['rating']
         #     lst.append(information)
         serializer = self.get_serializer(information_queryset, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BookmarkLotinListAPIView(generics.ListAPIView):
+    """
+        List a queryset.
+    """
+    authentication_classes = (JWTAuthentication, )
+    serializer_class = InformationSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        information_queryset = Information.objects.filter(
+            rel_information__user=user
+        ).annotate(
+                rating=Avg('ratings__rating'),
+                serial_count=Count(
+                    Case(
+                        When(is_serial=True, then='serials'),
+                        output_field=IntegerField()
+                    ),
+                    distinct=True)
+            )
+        serializer = self.get_serializer(information_queryset, many=True)
+        for item2 in serializer.data:
+                item2['title'] = to_lotin(item2['title'])
+                item2['fond']['name'] = to_lotin(item2['fond']['name'])
+                for item in item2['language']:
+                    item["name"] = to_lotin(item["name"])
+        print(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 
